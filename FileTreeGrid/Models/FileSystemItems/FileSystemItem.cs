@@ -8,6 +8,8 @@ using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Resources;
 using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace FileTreeGrids.Models.FileSystemItems
 {
@@ -24,6 +26,7 @@ namespace FileTreeGrids.Models.FileSystemItems
         private bool isDirectory;
         private FileSystemWatcher watcher;
         private FileSystemInfo info;
+        private List<FileSystemItem> childsList;
 
         //Properties
         public bool IsActive
@@ -82,17 +85,17 @@ namespace FileTreeGrids.Models.FileSystemItems
 
         private List<FileSystemItem> ChildsList
         {
-            get; set;
+            get => childsList;
+            set
+            {
+                childsList = value;
+                UpdateWatcherEvents();
+            }
         }
 
         //Constructors
         public FileSystemItem(FileSystemInfo info)
         {
-            IsHidden = false;
-            IsActive = false;
-
-            Info = info;
-
             watcher = new FileSystemWatcher();
             watcher.Changed += Watcher_Changed;
             watcher.Created += Watcher_Created;
@@ -102,6 +105,11 @@ namespace FileTreeGrids.Models.FileSystemItems
                                 | NotifyFilters.LastWrite
                                 | NotifyFilters.FileName
                                 | NotifyFilters.DirectoryName;
+
+            IsHidden = false;
+            IsActive = false;
+
+            Info = info;
         }
 
         //Methods
@@ -129,17 +137,17 @@ namespace FileTreeGrids.Models.FileSystemItems
             if (IsDirectory)
             {
                 watcher.Path = FullPath;
-                watcher.EnableRaisingEvents = true;
+                UpdateWatcherEvents();
             }
-            else
-                watcher.EnableRaisingEvents = false;
+            
 
             OnPropertyChanged(nameof(FullPath));
         }
         private void OnHiddenChanged()
         {
-            foreach (var child in Childs)
-                child.IsHidden = IsHidden && !IsActive;
+            if (Childs != null)
+                foreach (var child in Childs)
+                    child.IsHidden = IsHidden || !IsActive;
 
             OnPropertyChanged(nameof(IsHidden));
         }
@@ -150,8 +158,9 @@ namespace FileTreeGrids.Models.FileSystemItems
                 LoadChilds();
             }
 
-            foreach (var child in Childs)
-                child.IsHidden = IsHidden && !IsActive;
+            if (Childs != null)
+                foreach (var child in Childs)
+                    child.IsHidden = IsHidden || !IsActive;
 
             OnPropertyChanged(nameof(IsActive));
         }
@@ -196,46 +205,72 @@ namespace FileTreeGrids.Models.FileSystemItems
         }
         private void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
-            var item = ChildsList.Find(i => i.FullPath == e.FullPath);
-            item.OnInfoChanged();
+            Application.Current.Dispatcher.Invoke(() => 
+            {
+                var item = ChildsList?.Find(i => i.FullPath == e.FullPath);
+                item?.OnInfoChanged();
+            });
         }
         private void Watcher_Deleted(object sender, FileSystemEventArgs e)
         {
-            RemoveChild(e.FullPath);
+            Application.Current.Dispatcher.Invoke(() => RemoveChild(e.FullPath));
         }
         private void Watcher_Created(object sender, FileSystemEventArgs e)
         {
-            AddChild(e.FullPath);
+            Application.Current.Dispatcher.Invoke(() => AddChild(e.FullPath));
         }
         private void Watcher_Renamed(object sender, RenamedEventArgs e)
         {
-            RemoveChild(e.OldFullPath);
-            AddChild(e.FullPath);
+            Application.Current.Dispatcher.Invoke(() => 
+            {
+                RemoveChild(e.OldFullPath);
+                AddChild(e.FullPath);
+            });
         }
         private void RemoveChild(string fullPath)
         {
-            var item = ChildsList.Find(i => i.FullPath == fullPath);
-            ChildsList.Remove(item);
+            if (ChildsList != null)
+            {
+                var item = ChildsList.Find(i => i.FullPath == fullPath);
+                if (item != null)
+                {
+                    ChildsList.Remove(item);
 
-            ChildsChanged?.Invoke(this,
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+                    ChildsChanged?.Invoke(this,
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+                }
+            }
         }
         private void AddChild(string fullPath)
         {
-            FileSystemItem item;
+            if (ChildsList != null)
+            {
+                FileSystemItem item;
+                try
+                {
+                    item = Create(GetType(), fullPath);
+                }
+                catch
+                {
+                    return;
+                }
+                FixItemState(item, this);
+                ChildsList.Add(item);
+
+                ChildsChanged?.Invoke(this,
+                    new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+            }
+        }
+        private void UpdateWatcherEvents()
+        {
             try
             {
-                item = Create(GetType(), fullPath);
+                watcher.EnableRaisingEvents = IsDirectory && ChildsList != null;
             }
             catch
             {
-                return;
+                watcher.EnableRaisingEvents = false;
             }
-
-            ChildsList.Add(item);
-
-            ChildsChanged?.Invoke(this,
-                new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
 
 

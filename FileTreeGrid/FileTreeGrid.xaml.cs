@@ -1,4 +1,5 @@
 using FileTreeGrids.Extensions;
+using FileTreeGrids.Models.Converters;
 using FileTreeGrids.Models.FileSystemItems;
 using FileTreeGrids.Models.FileSystemTrees;
 using System;
@@ -42,6 +43,10 @@ namespace FileTreeGrids
             remove { RemoveHandler(ItemTypeChangedEvent, value); }
         }
 
+        //Fields
+        private FileSystemTree itemsSource;
+        private FileSystemTreeToCollectionConverter converter;
+
         //Properties
         public string Root
         {
@@ -56,7 +61,13 @@ namespace FileTreeGrids
 
         internal FileSystemTree ItemsSource
         {
-            get;
+            get => itemsSource;
+            set
+            {
+                itemsSource = value;
+                converter.Tree = value;
+                grid.ItemsSource = converter.Collection;
+            }
         }
 
 
@@ -65,9 +76,8 @@ namespace FileTreeGrids
         {
             RootProperty = DependencyProperty.Register(
                 nameof(Root), typeof(string), typeof(FileTreeGrid),
-                new FrameworkPropertyMetadata(string.Empty, 
-                    new PropertyChangedCallback(OnRootChanged)),
-                new ValidateValueCallback(ValidateRootValue));
+                new FrameworkPropertyMetadata(string.Empty,
+                    new PropertyChangedCallback(OnRootChanged)));
             ItemTypeProperty = DependencyProperty.Register(
                 nameof(ItemType), typeof(Type), typeof(FileTreeGrid),
                 new FrameworkPropertyMetadata(typeof(FileSystemItem),
@@ -85,23 +95,16 @@ namespace FileTreeGrids
         }
         public FileTreeGrid()
         {
+            InitializeComponent();
+
+            converter = new FileSystemTreeToCollectionConverter();
             ItemsSource = new FileSystemTree();
 
-            InitializeComponent();
+            Root = @"F:\Programs";
+            ItemsSource.Root.IsActive = true;
         }
 
         //Static methods
-        private static bool ValidateRootValue(object value)
-        {
-            string src = value as string;
-            if (string.IsNullOrWhiteSpace(src))
-                return false;
-
-            if (!Directory.Exists(src))
-                return false;
-
-            return true;
-        }
         private static void OnRootChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = (FileTreeGrid)d;

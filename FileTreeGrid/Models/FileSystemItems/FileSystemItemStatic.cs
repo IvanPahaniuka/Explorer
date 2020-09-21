@@ -31,5 +31,13 @@ namespace FileTreeGrids.Models.FileSystemItems
             var item = Activator.CreateInstance(itemType, info) as FileSystemItem;
             return item;
         }
+        
+        public static void FixItemState(FileSystemItem item, FileSystemItem parent)
+        {
+            if (item == null || parent == null)
+                return;
+
+            item.IsHidden = !parent.IsActive || parent.IsHidden;
+        }
     }
 }

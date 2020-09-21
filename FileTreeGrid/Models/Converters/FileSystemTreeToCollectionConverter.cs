@@ -10,10 +10,11 @@ using System.Windows;
 using System.Windows.Data;
 using System.ComponentModel;
 using System.Collections.Specialized;
+using System.Collections;
 
-namespace FileTreeGrids.Converters
+namespace FileTreeGrids.Models.Converters
 {
-    public class FileSystemTreeToCollectionConverter : IValueConverter
+    public class FileSystemTreeToCollectionConverter
     {
         //Fields
         private ObservableCollection<FileSystemItem> collection;
@@ -21,7 +22,11 @@ namespace FileTreeGrids.Converters
         private FileSystemItem bindedRoot;
 
         //Properties
-        private FileSystemTree Tree
+        public ReadOnlyObservableCollection<FileSystemItem> Collection
+        {
+            get;
+        } 
+        public FileSystemTree Tree
         {
             get => tree;
             set
@@ -36,24 +41,10 @@ namespace FileTreeGrids.Converters
         public FileSystemTreeToCollectionConverter()
         {
             collection = new ObservableCollection<FileSystemItem>();
+            Collection = new ReadOnlyObservableCollection<FileSystemItem>(collection);
         }
 
         //Methods
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (value is FileSystemTree tree)
-            {
-                Tree = tree;
-                return collection;
-            }
-
-            return DependencyProperty.UnsetValue;
-        }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return DependencyProperty.UnsetValue;
-        }
-
         private void Unbind(FileSystemTree tree)
         {
             if (tree == null)
@@ -89,6 +80,10 @@ namespace FileTreeGrids.Converters
             collection.Remove(item);
 
             item.ChildsChanged -= Item_ChildsChanged;
+            if (item.Childs != null)
+                Item_ChildsChanged(item, new NotifyCollectionChangedEventArgs(
+                   NotifyCollectionChangedAction.Remove,
+                   new List<FileSystemItem>(item.Childs)));
         }
         private void Bind(FileSystemItem item, FileSystemItem parent = null)
         {
@@ -103,9 +98,12 @@ namespace FileTreeGrids.Converters
             else
                 collection.Add(item);
 
+
             item.ChildsChanged += Item_ChildsChanged;
-            Item_ChildsChanged(item, new NotifyCollectionChangedEventArgs(
-                NotifyCollectionChangedAction.Add, item.Childs));
+            if (item.Childs != null)
+                Item_ChildsChanged(item, new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Add, 
+                    new List<FileSystemItem>(item.Childs)));
         }
         private void Item_ChildsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -117,7 +115,7 @@ namespace FileTreeGrids.Converters
                         Bind(item as FileSystemItem, itemSender);
                     break;
                 case NotifyCollectionChangedAction.Remove:
-                    foreach (var item in e.NewItems)
+                    foreach (var item in e.OldItems)
                         Unbind(item as FileSystemItem);
                     break;
                 case NotifyCollectionChangedAction.Reset:

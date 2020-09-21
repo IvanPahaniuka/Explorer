@@ -66,6 +66,8 @@ namespace FileTreeGrids.Models.FileSystemTrees
         }
         private void ReloadRoot()
         {
+            Root = null;
+
             if (string.IsNullOrWhiteSpace(RootFullPath))
                 return;
 
