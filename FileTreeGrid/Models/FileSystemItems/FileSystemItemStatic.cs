@@ -1,0 +1,35 @@
+﻿using FileTreeGrids.Extensions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
+
+namespace FileTreeGrids.Models.FileSystemItems
+{
+    public partial class FileSystemItem
+    {
+        //Static methods
+        public static T Create<T>(string path) where T: FileSystemItem
+        {
+            var info = FileSystemInfoExtensions.GetInfo(path);
+            return Create<T>(info);
+        }
+        public static FileSystemItem Create(Type itemType, string path)
+        {
+            var info = FileSystemInfoExtensions.GetInfo(path);
+            return Create(itemType, info);
+        }
+        public static T Create<T>(FileSystemInfo info) where T : FileSystemItem
+        {
+            return Create(typeof(T), info) as T;
+        }
+        public static FileSystemItem Create(Type itemType, FileSystemInfo info)
+        {
+            if (!itemType.IsCompatible<FileSystemItem>())
+                throw new ArgumentException();
+
+            var item = Activator.CreateInstance(itemType, info) as FileSystemItem;
+            return item;
+        }
+    }
+}
