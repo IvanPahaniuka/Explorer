@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "AbVw1rBBIpOsjHILe4+90ZzG/5qon4UeZQgNW67kCsYhX/mB7TN0dSq06gDvQprcgXc7+dW8ujS5PGtdl2v2OQ==",
+  "dgSpecHash": "PiJiaV3C7XMdaPxX7kReySnENZPODDnTR1o0DVFPBCtliEtGvAtMj8lMqFLaEJ3LUfMytMOh83tDG3RxAxPIGA==",
   "success": true,
   "projectFilePath": "F:\\Programs\\VSProjects\\Explorer\\FileTreeGrid\\FileTreeGrid.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.19\\microsoft.xaml.behaviors.wpf.1.1.19.nupkg.sha512"
+  ],
   "logs": []
 }

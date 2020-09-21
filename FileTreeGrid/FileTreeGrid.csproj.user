@@ -2,7 +2,10 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Page Update="FileTreeGrid.xaml">
+    <Page Update="View\FileTreeGrids\FileTreeGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\Templates\TriangleCheckBox.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

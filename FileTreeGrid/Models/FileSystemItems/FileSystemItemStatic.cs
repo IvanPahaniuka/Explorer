@@ -38,6 +38,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                 return;
 
             item.IsHidden = !parent.IsActive || parent.IsHidden;
+            item.Level = parent.Level + 1;
         }
     }
 }

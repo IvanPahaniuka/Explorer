@@ -99,9 +99,8 @@ namespace FileTreeGrids
 
             converter = new FileSystemTreeToCollectionConverter();
             ItemsSource = new FileSystemTree();
-
+            
             Root = @"F:\Programs";
-            ItemsSource.Root.IsActive = true;
         }
 
         //Static methods
@@ -148,6 +147,15 @@ namespace FileTreeGrids
         {
             ItemsSource.ItemType = ItemType;
             RaiseEvent(args);
+        }
+
+        private void DataGridRow_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is DataGridRow row &&
+                row.Item is FileSystemItem item)
+            {
+                item.IsActive = !item.IsActive;
+            }
         }
     }
 }

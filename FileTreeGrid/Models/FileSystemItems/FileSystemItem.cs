@@ -22,6 +22,7 @@ namespace FileTreeGrids.Models.FileSystemItems
         //Fields
         private bool isActive;
         private bool isHidden;
+        private int level;
         private string fullPath;
         private bool isDirectory;
         private FileSystemWatcher watcher;
@@ -46,6 +47,16 @@ namespace FileTreeGrids.Models.FileSystemItems
                 isHidden = value;
                 OnHiddenChanged();
             }
+        }
+        public int Level
+        {
+            get => level;
+            set
+            {
+                level = value;
+                OnPropertyChanged();
+            }
+
         }
         public string FullPath
         {
@@ -108,6 +119,7 @@ namespace FileTreeGrids.Models.FileSystemItems
 
             IsHidden = false;
             IsActive = false;
+            Level = 0;
 
             Info = info;
         }
@@ -176,6 +188,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                     try
                     {
                         var item = Activator.CreateInstance(GetType(), file) as FileSystemItem;
+                        FixItemState(item, this);
                         ChildsList.Add(item);
                     }
                     catch
