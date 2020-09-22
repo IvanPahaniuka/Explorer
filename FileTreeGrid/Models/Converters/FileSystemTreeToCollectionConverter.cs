@@ -13,6 +13,7 @@ using System.Collections.Specialized;
 using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Immutable;
 
 namespace FileTreeGrids.Models.Converters
 {
@@ -99,8 +100,17 @@ namespace FileTreeGrids.Models.Converters
 
             if (parent != null)
             {
-                int parentIndex = collection.IndexOf(parent);
-                collection.Insert(parentIndex + 1, item);
+                int index = collection.IndexOf(parent);
+                foreach (var child in parent.Childs)
+                    if (child != item)
+                    {
+                        if (collection.Contains(child))
+                            index++;
+                    }
+                    else
+                        break;
+
+                collection.Insert(index + 1, item);
             }
             else
                 collection.Add(item);
@@ -161,6 +171,15 @@ namespace FileTreeGrids.Models.Converters
                     foreach (var child in itemSender.Childs)
                         Unbind(child);
                     break;
+                case NotifyCollectionChangedAction.Move:
+                    MoveItems(e.OldItems, e.OldStartingIndex, e.NewStartingIndex);
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                    foreach (var item in e.OldItems)
+                        Unbind(item as FileSystemItem);
+                    foreach (var item in e.NewItems)
+                        Bind(item as FileSystemItem, itemSender);
+                    break;
             }
         }
         private void CollectionSource_Filter(object sender, FilterEventArgs e)
@@ -168,6 +187,17 @@ namespace FileTreeGrids.Models.Converters
             if (e.Item is FileSystemItem item)
             {
                 e.Accepted = !item.IsHidden;
+            }
+        }
+        private void MoveItems(IList items, int oldIndex, int newIndex)
+        {
+            if (items == null || items.Count == 0)
+                return;
+
+            int offset = collection.IndexOf(items[0] as FileSystemItem);
+            for (int i = 0; i < items.Count; i++)
+            {
+                collection.Move(offset + i, offset + i + newIndex - oldIndex);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using FileTreeGrids.Extensions;
+﻿using FileTreeGrid.Models.Comparers.FileSystemItems;
+using FileTreeGrids.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -77,7 +78,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                 OnPropertyChanged();
             }
         }
-        public IEnumerable<FileSystemItem> Childs
+        public IReadOnlyCollection<FileSystemItem> Childs
         {
             get => ChildsList;
         }
@@ -210,6 +211,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                     {
                     }
                 }
+                ChildsList.Sort(FileSystemItemsComparers.NameComparer);
             }
             catch
             {
@@ -284,6 +286,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                 }
                 FixItemState(item, this);
                 ChildsList.Add(item);
+                ChildsList.Sort(FileSystemItemsComparers.NameComparer);
 
                 ChildsChanged?.Invoke(this,
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));

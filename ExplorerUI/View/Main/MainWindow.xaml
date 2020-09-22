@@ -4,17 +4,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExplorerUI.View.Main"
+        xmlns:model="clr-namespace:ExplorerUI.ViewModel.Main"
         xmlns:tree="clr-namespace:FileTreeGrids;assembly=FileTreeGrid"
         mc:Ignorable="d"
         Title="Проводник" Height="450" Width="800">
+    <Window.CommandBindings>
+        <CommandBinding Command="model:MainViewModel.SelectRoot" Executed="CommandBinding_SelectRoot"/>
+    </Window.CommandBindings>
     <DockPanel>
         <Menu x:Name="menu" Height="23" DockPanel.Dock="Top">
             <MenuItem Height="{Binding ElementName=menu, Path=Height}" Header="Каталог">
-                <MenuItem Header="Выбрать"/>
+                <MenuItem Header="Выбрать" Command="model:MainViewModel.SelectRoot"/>
             </MenuItem>
-            <MenuItem Header="Справка"></MenuItem>
         </Menu>
 
-        <tree:FileTreeGrid DockPanel.Dock="Top"/>
+        <tree:FileTreeGrid DockPanel.Dock="Top" Root="{Binding RootFullPath}"/>
     </DockPanel>
 </Window>
