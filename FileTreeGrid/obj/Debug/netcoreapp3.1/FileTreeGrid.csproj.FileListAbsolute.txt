@@ -14,3 +14,5 @@ F:\Programs\VSProjects\Explorer\FileTreeGrid\obj\Debug\netcoreapp3.1\View\FileTr
 F:\Programs\VSProjects\Explorer\FileTreeGrid\obj\Debug\netcoreapp3.1\View\FileTreeGrids\FileTreeGrid.baml
 F:\Programs\VSProjects\Explorer\FileTreeGrid\obj\Debug\netcoreapp3.1\View\Templates\TriangleCheckBox.baml
 F:\Programs\VSProjects\Explorer\FileTreeGrid\obj\Debug\netcoreapp3.1\GeneratedInternalTypeHelper.g.cs
+F:\Programs\VSProjects\Explorer\FileTreeGrid\obj\Debug\netcoreapp3.1\FileTreeGrid.Properties.Resources.resources
+F:\Programs\VSProjects\Explorer\FileTreeGrid\obj\Debug\netcoreapp3.1\FileTreeGrid.csproj.GenerateResource.cache

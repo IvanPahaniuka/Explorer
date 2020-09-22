@@ -1,31 +1,31 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:FileTreeGrid.View.Templates">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ControlTemplate x:Key="triangleCheckBoxTemplate" TargetType="CheckBox">
         <ControlTemplate.Resources>
             <Color x:Key="mainColor" A="255" B="50" G="50" R="50" />
             <SolidColorBrush x:Key="mainColorBrush" Color="{StaticResource mainColor}" />
         </ControlTemplate.Resources>
 
-
-        <Path x:Name="path" 
-                                  Fill="Transparent"
-                                  Stroke="{StaticResource mainColorBrush}" 
-                                  Stretch="Fill" RenderTransformOrigin="0.5,0.5">
-            <Path.RenderTransform>
-                <TransformGroup>
-                    <RotateTransform x:Name="rotateTransfrom" Angle="-45"/>
-                    <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
-                </TransformGroup>
-            </Path.RenderTransform>
-            <Path.Data>
-                <PathGeometry>
-                    <PathFigure IsClosed="True" StartPoint="0,100">
-                        <LineSegment Point="100,100" />
-                        <LineSegment Point="100,0" />
-                    </PathFigure>
-                </PathGeometry>
-            </Path.Data>
+        <Border Background="Transparent">
+            <Path x:Name="path"
+                Fill="Transparent"
+                Stroke="{StaticResource mainColorBrush}" 
+                Stretch="Fill" RenderTransformOrigin="0.5,0.5">
+                <Path.RenderTransform>
+                    <TransformGroup>
+                        <RotateTransform x:Name="rotateTransfrom" Angle="-45"/>
+                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                    </TransformGroup>
+                </Path.RenderTransform>
+                <Path.Data>
+                    <PathGeometry>
+                        <PathFigure IsClosed="True" StartPoint="0,100">
+                            <LineSegment Point="100,100" />
+                            <LineSegment Point="100,0" />
+                        </PathFigure>
+                    </PathGeometry>
+                </Path.Data>
+            </Path>
 
             <VisualStateManager.VisualStateGroups>
                 <VisualStateGroup Name="CheckStates">
@@ -50,7 +50,7 @@
                         <Storyboard>
                             <ColorAnimation Storyboard.TargetName="path"
                                                     Storyboard.TargetProperty="Fill.Color" 
-                                                    To="Transparent" Duration="0:0:0.3"/>
+                                                    To="#00555555" Duration="0:0:0.3"/>
                         </Storyboard>
                     </VisualState>
 
@@ -63,6 +63,7 @@
                     </VisualState>
                 </VisualStateGroup>
             </VisualStateManager.VisualStateGroups>
-        </Path>
+        </Border>
+        
     </ControlTemplate>
 </ResourceDictionary>

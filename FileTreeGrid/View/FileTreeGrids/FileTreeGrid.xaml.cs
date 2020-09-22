@@ -4,6 +4,7 @@ using FileTreeGrids.Models.FileSystemItems;
 using FileTreeGrids.Models.FileSystemTrees;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -58,6 +59,10 @@ namespace FileTreeGrids
             get { return (Type)GetValue(ItemTypeProperty); }
             set { SetValue(ItemTypeProperty, value); }
         }
+        public ObservableCollection<DataGridColumn> Columns
+        {
+            get => grid.Columns;
+        }
 
         internal FileSystemTree ItemsSource
         {
@@ -66,7 +71,7 @@ namespace FileTreeGrids
             {
                 itemsSource = value;
                 converter.Tree = value;
-                grid.ItemsSource = converter.Collection;
+                grid.ItemsSource = converter.CollectionSource.View;
             }
         }
 
@@ -96,11 +101,9 @@ namespace FileTreeGrids
         public FileTreeGrid()
         {
             InitializeComponent();
-
+            
             converter = new FileSystemTreeToCollectionConverter();
             ItemsSource = new FileSystemTree();
-            
-            Root = @"F:\Programs";
         }
 
         //Static methods

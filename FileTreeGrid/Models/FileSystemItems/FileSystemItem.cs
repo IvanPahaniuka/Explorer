@@ -24,6 +24,7 @@ namespace FileTreeGrids.Models.FileSystemItems
         private bool isHidden;
         private int level;
         private string fullPath;
+        private string name;
         private bool isDirectory;
         private FileSystemWatcher watcher;
         private FileSystemInfo info;
@@ -65,6 +66,15 @@ namespace FileTreeGrids.Models.FileSystemItems
             {
                 fullPath = value;
                 OnPathChanged();
+            }
+        }
+        public string Name
+        {
+            get => name;
+            private set
+            {
+                name = value;
+                OnPropertyChanged();
             }
         }
         public IEnumerable<FileSystemItem> Childs
@@ -145,12 +155,17 @@ namespace FileTreeGrids.Models.FileSystemItems
             ClearChilds();
             IsActive = false;
 
+            Name = Path.GetFileName(FullPath);
+            if (string.IsNullOrWhiteSpace(Name))
+                Name = FullPath;
+
             IsDirectory = PathExtensions.IsDirectory(FullPath);
             if (IsDirectory)
             {
                 watcher.Path = FullPath;
                 UpdateWatcherEvents();
             }
+            
             
 
             OnPropertyChanged(nameof(FullPath));

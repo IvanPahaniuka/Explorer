@@ -11,6 +11,8 @@ using System.Windows.Data;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using System.Collections;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace FileTreeGrids.Models.Converters
 {
@@ -20,12 +22,10 @@ namespace FileTreeGrids.Models.Converters
         private ObservableCollection<FileSystemItem> collection;
         private FileSystemTree tree;
         private FileSystemItem bindedRoot;
+        private Task refreshTask;
+        private CancellationTokenSource refreshTokenSource;
 
         //Properties
-        public ReadOnlyObservableCollection<FileSystemItem> Collection
-        {
-            get;
-        } 
         public FileSystemTree Tree
         {
             get => tree;
@@ -36,12 +36,18 @@ namespace FileTreeGrids.Models.Converters
                 Bind(tree);
             }
         }
+        public CollectionViewSource CollectionSource
+        {
+            get;
+        }
 
         //Constructors
         public FileSystemTreeToCollectionConverter()
         {
             collection = new ObservableCollection<FileSystemItem>();
-            Collection = new ReadOnlyObservableCollection<FileSystemItem>(collection);
+
+            CollectionSource = new CollectionViewSource() { Source = collection };
+            CollectionSource.Filter += new FilterEventHandler(CollectionSource_Filter);
         }
 
         //Methods
@@ -79,6 +85,7 @@ namespace FileTreeGrids.Models.Converters
 
             collection.Remove(item);
 
+            item.PropertyChanged -= Item_PropertyChanged;
             item.ChildsChanged -= Item_ChildsChanged;
             if (item.Childs != null)
                 Item_ChildsChanged(item, new NotifyCollectionChangedEventArgs(
@@ -98,12 +105,44 @@ namespace FileTreeGrids.Models.Converters
             else
                 collection.Add(item);
 
-
+            item.PropertyChanged += Item_PropertyChanged;
             item.ChildsChanged += Item_ChildsChanged;
             if (item.Childs != null)
                 Item_ChildsChanged(item, new NotifyCollectionChangedEventArgs(
-                    NotifyCollectionChangedAction.Add, 
+                    NotifyCollectionChangedAction.Add,
                     new List<FileSystemItem>(item.Childs)));
+        }
+        private void Item_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FileSystemItem.IsHidden) &&
+                sender is FileSystemItem)
+            {
+                GrowUpRefreshTask();
+            }
+        }
+        private void GrowUpRefreshTask()
+        {
+            if (refreshTask == null || refreshTask.IsCompleted)
+            {
+                refreshTokenSource = new CancellationTokenSource();
+                var token = refreshTokenSource.Token;
+                refreshTask = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(50, token);
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (!token.IsCancellationRequested)
+                                CollectionSource.View.Refresh();
+                        });
+                    }
+                    catch
+                    {
+
+                    }
+                });
+            }
         }
         private void Item_ChildsChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
@@ -124,11 +163,22 @@ namespace FileTreeGrids.Models.Converters
                     break;
             }
         }
+        private void CollectionSource_Filter(object sender, FilterEventArgs e)
+        {
+            if (e.Item is FileSystemItem item)
+            {
+                e.Accepted = !item.IsHidden;
+            }
+        }
 
         //Destructor
         ~FileSystemTreeToCollectionConverter()
         {
             Unbind(Tree);
+
+            if (refreshTokenSource != null && 
+                !refreshTokenSource.IsCancellationRequested)
+                refreshTokenSource.Cancel();
         }
     }
 }
