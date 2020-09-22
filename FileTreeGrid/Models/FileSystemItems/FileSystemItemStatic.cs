@@ -40,5 +40,13 @@ namespace FileTreeGrids.Models.FileSystemItems
             item.IsHidden = !parent.IsActive || parent.IsHidden;
             item.Level = parent.Level + 1;
         }
+        private static void FixItemState(FileSystemItem item, FileSystemItemMemento parent)
+        {
+            if (item == null)
+                return;
+
+            item.IsHidden = !parent.isActive || parent.isHidden;
+            item.Level = parent.level + 1;
+        }
     }
 }

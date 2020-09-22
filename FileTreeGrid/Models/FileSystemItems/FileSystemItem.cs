@@ -9,6 +9,8 @@ using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Resources;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -16,6 +18,22 @@ namespace FileTreeGrids.Models.FileSystemItems
 {
     public partial class FileSystemItem : INotifyPropertyChanged
     {
+        //Struct
+        private struct FileSystemItemMemento
+        {
+            public bool isActive;
+            public bool isHidden;
+            public int level;
+
+            public static FileSystemItemMemento Create(FileSystemItem item)
+            {
+                return new FileSystemItemMemento { 
+                    isActive = item.isActive,  
+                    isHidden = item.isHidden,
+                    level = item.level};
+            }
+        }
+
         //Events
         public event PropertyChangedEventHandler PropertyChanged;
         public event NotifyCollectionChangedEventHandler ChildsChanged;
@@ -30,6 +48,8 @@ namespace FileTreeGrids.Models.FileSystemItems
         private FileSystemWatcher watcher;
         private FileSystemInfo info;
         private List<FileSystemItem> childsList;
+        private CancellationTokenSource loadingTokenSource;
+        private Task loadingTask;
 
         //Properties
         public bool IsActive
@@ -194,34 +214,49 @@ namespace FileTreeGrids.Models.FileSystemItems
         }
         private void LoadChilds()
         {
-            try
-            {
-                ChildsList = new List<FileSystemItem>();
-                var dirInfo = Info as DirectoryInfo;
-                var files = dirInfo.GetFileSystemInfos();
-                foreach (var file in files)
-                {
-                    try
-                    {
-                        var item = Activator.CreateInstance(GetType(), file) as FileSystemItem;
-                        FixItemState(item, this);
-                        ChildsList.Add(item);
-                    }
-                    catch
-                    {
-                    }
-                }
-                ChildsList.Sort(FileSystemItemsComparers.NameComparer);
-            }
-            catch
-            {
-                return;
-            }
+            StopLoadingTask();
 
-            ChildsChanged?.Invoke(this, 
-                new NotifyCollectionChangedEventArgs(
-                    NotifyCollectionChangedAction.Add,
-                    ChildsList));
+            loadingTokenSource = new CancellationTokenSource();
+            var token = loadingTokenSource.Token;
+            var memento = FileSystemItemMemento.Create(this);
+            loadingTask = Task.Run(() => {
+                try
+                {
+                    var newChilds = new List<FileSystemItem>();
+                    var dirInfo = Info as DirectoryInfo;
+                    var files = dirInfo.GetFileSystemInfos();
+                    foreach (var file in files)
+                    {
+                        if (token.IsCancellationRequested)
+                            return;
+
+                        try
+                        {
+                            var item = Activator.CreateInstance(GetType(), file) as FileSystemItem;
+                            FixItemState(item, memento);
+                            newChilds.Add(item);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    newChilds.Sort(FileSystemItemsComparers.NameComparer);
+
+                    if (token.IsCancellationRequested)
+                        return;
+
+                    Application.Current.Dispatcher.Invoke(() => {
+                        ChildsList = newChilds;
+                        ChildsChanged?.Invoke(this,
+                           new NotifyCollectionChangedEventArgs(
+                               NotifyCollectionChangedAction.Add,
+                               ChildsList));
+                    }, DispatcherPriority.Background);
+                }
+                catch { }
+            });
+
+           
         }
         private void ClearChilds()
         {
@@ -303,11 +338,23 @@ namespace FileTreeGrids.Models.FileSystemItems
                 watcher.EnableRaisingEvents = false;
             }
         }
+        private void StopLoadingTask()
+        {
+            if (loadingTask != null &&
+                !loadingTask.IsCompleted)
+            {
+                if (!loadingTokenSource.IsCancellationRequested)
+                    loadingTokenSource.Cancel();
+
+                loadingTask.Wait();
+            }
+        }
 
 
         ~FileSystemItem()
         {
             watcher.Dispose();
+            StopLoadingTask();
         }
     }
 }
