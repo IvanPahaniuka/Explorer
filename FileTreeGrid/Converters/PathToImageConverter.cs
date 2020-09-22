@@ -18,7 +18,17 @@ namespace FileTreeGrid.Converters
         {
             if (value is string path)
             {
-                if (!PathExtensions.IsDirectory(path))
+                bool isDir;
+                try
+                {
+                    isDir = PathExtensions.IsDirectory(path);
+                }
+                catch
+                {
+                    return DependencyProperty.UnsetValue;
+                }
+
+                if (!isDir)
                 {
                     try
                     {
