@@ -121,7 +121,10 @@ namespace FileTreeGrids.Models.FileSystemItems
                     throw new ArgumentNullException();
 
                 info = value;
-                FullPath = info.FullName;
+                if (info.FullName != FullPath)
+                    FullPath = info.FullName;
+
+                OnInfoChanged();
             }
         }
 
@@ -177,8 +180,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                     new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
             }
         }
-
-        protected internal virtual void OnInfoChanged()
+        internal void UpdateInfo()
         {
             try
             {
@@ -186,7 +188,15 @@ namespace FileTreeGrids.Models.FileSystemItems
             }
             catch
             {
+                return;
             }
+
+
+            OnInfoChanged();
+        }
+
+        protected virtual void OnInfoChanged()
+        {
         }
         protected void OnPropertyChanged([CallerMemberName] string prop = "")
         {
@@ -203,6 +213,9 @@ namespace FileTreeGrids.Models.FileSystemItems
                 Name = FullPath;
 
             IsDirectory = PathExtensions.IsDirectory(FullPath);
+
+            if (Info.FullName != FullPath)
+                Info = FileSystemInfoExtensions.GetInfo(FullPath);
 
             OnPropertyChanged(nameof(FullPath));
         }
@@ -290,7 +303,7 @@ namespace FileTreeGrids.Models.FileSystemItems
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var item = ChildsList?.Find(i => i.FullPath == e.FullPath);
-                item?.OnInfoChanged();
+                item?.UpdateInfo();
             });
         }
         private void Watcher_Deleted(object sender, FileSystemEventArgs e)

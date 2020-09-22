@@ -1,4 +1,5 @@
-﻿using ExplorerUI.ViewModel.Main;
+﻿using ExplorerUI.Models.FileSystemItems;
+using ExplorerUI.ViewModel.Main;
 using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -30,7 +31,7 @@ namespace ExplorerUI.View.Main
         {
             InitializeComponent();
 
-            model = new MainViewModel();
+            model = new MainViewModel { ItemType = typeof(ExtendedSystemItem) };
             DataContext = model;
         }
         

@@ -153,7 +153,7 @@ namespace FileTreeGrids.Models.FileSystemTrees
                 {
                     var item = FindItem(e.FullPath);
                     if (item != null)
-                        item.OnInfoChanged();
+                        item.UpdateInfo();
                 });
             }
 

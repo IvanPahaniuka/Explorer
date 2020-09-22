@@ -4,20 +4,29 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExplorerUI.View.Main"
-        xmlns:model="clr-namespace:ExplorerUI.ViewModel.Main"
+        xmlns:vm="clr-namespace:ExplorerUI.ViewModel.Main"
+        xmlns:model="clr-namespace:ExplorerUI.Models"
         xmlns:tree="clr-namespace:FileTreeGrids;assembly=FileTreeGrid"
         mc:Ignorable="d"
         Title="Проводник" Height="450" Width="800">
+
     <Window.CommandBindings>
-        <CommandBinding Command="model:MainViewModel.SelectRoot" Executed="CommandBinding_SelectRoot"/>
+        <CommandBinding Command="vm:MainViewModel.SelectRoot" Executed="CommandBinding_SelectRoot"/>
     </Window.CommandBindings>
+    
     <DockPanel>
         <Menu x:Name="menu" Height="23" DockPanel.Dock="Top">
             <MenuItem Height="{Binding ElementName=menu, Path=Height}" Header="Каталог">
-                <MenuItem Header="Выбрать" Command="model:MainViewModel.SelectRoot"/>
+                <MenuItem Header="Выбрать" Command="vm:MainViewModel.SelectRoot"/>
             </MenuItem>
         </Menu>
 
-        <tree:FileTreeGrid DockPanel.Dock="Top" Root="{Binding RootFullPath}"/>
+        <tree:FileTreeGrid DockPanel.Dock="Top" Root="{Binding RootFullPath}" 
+                           ItemType="{Binding ItemType}">
+            <tree:FileTreeGrid.Columns>
+                        <DataGridTextColumn Header="Дата изменения" 
+                                            Binding="{Binding Path=LastWriteTime, StringFormat='dd.MM.yyyy'}"/>
+            </tree:FileTreeGrid.Columns>
+        </tree:FileTreeGrid>
     </DockPanel>
 </Window>

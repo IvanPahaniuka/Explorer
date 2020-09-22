@@ -10,38 +10,10 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Templates/TriangleCheckBox.xaml" />
+                <ResourceDictionary Source="../Templates/PathDataTemplate.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <conv:PathToImageConverter x:Key="pathToImageConverter"/>
-            
-            <DataTemplate x:Key="pathTemplate">
-                <DataTemplate.Resources>
-                    <conv:IntToThicknessConverter x:Key="intToThicknessConverter"/>
-                </DataTemplate.Resources>
-
-                <StackPanel Orientation="Horizontal" 
-                            Margin="{Binding Level, ConverterParameter='x10.0 x0 x0', Converter={StaticResource intToThicknessConverter}}">
-                    <CheckBox Width="10" Height="10" Margin="3"
-                          Template="{StaticResource triangleCheckBoxTemplate}"
-                          IsChecked="{Binding IsActive, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
-                        <CheckBox.Style>
-                            <Style TargetType="CheckBox">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsDirectory}" Value="False">
-                                        <Setter Property="Visibility" Value="Hidden"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </CheckBox.Style>
-                    </CheckBox>
-
-                    <Image Width="14" Height="14" Margin="0,0,5,0" 
-                           Source="{Binding FullPath, Converter={StaticResource pathToImageConverter}}"/>
-
-                    <TextBlock Text="{Binding Name}" />
-                </StackPanel>
-            </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -53,7 +25,7 @@
               CanUserResizeRows="False"
               AutoGenerateColumns="False" IsReadOnly="True">
         <DataGrid.Columns>
-            <DataGridTemplateColumn Header="Путь" CellTemplate="{StaticResource pathTemplate}"/>
+            <DataGridTemplateColumn Header="Имя" CellTemplate="{StaticResource pathTemplate}"/>
         </DataGrid.Columns>
 
         <DataGrid.RowStyle>

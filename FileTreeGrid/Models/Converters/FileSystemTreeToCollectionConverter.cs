@@ -1,6 +1,5 @@
 ﻿using FileTreeGrids.Models.FileSystemItems;
 using FileTreeGrids.Models.FileSystemTrees;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +13,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace FileTreeGrids.Models.Converters
 {
@@ -98,22 +98,7 @@ namespace FileTreeGrids.Models.Converters
             if (item == null)
                 return;
 
-            if (parent != null)
-            {
-                int index = collection.IndexOf(parent);
-                foreach (var child in parent.Childs)
-                    if (child != item)
-                    {
-                        if (collection.Contains(child))
-                            index++;
-                    }
-                    else
-                        break;
-
-                collection.Insert(index + 1, item);
-            }
-            else
-                collection.Add(item);
+            InsertItem(item, parent);
 
             item.PropertyChanged += Item_PropertyChanged;
             item.ChildsChanged += Item_ChildsChanged;
@@ -199,6 +184,41 @@ namespace FileTreeGrids.Models.Converters
             {
                 collection.Move(offset + i, offset + i + newIndex - oldIndex);
             }
+        }
+        private void InsertItem(FileSystemItem item, FileSystemItem parent = null)
+        {
+            if (parent != null)
+            {
+                int index = collection.IndexOf(parent);
+                int preIndex = parent.ChildsList.IndexOf(item);
+
+                while (preIndex >= 0)
+                {
+                    int indexTmp = -1;
+                    do
+                    {
+                        preIndex--;
+                        if (preIndex >= 0)
+                            indexTmp = collection.IndexOf(parent.ChildsList[preIndex]);
+                    }
+                    while (preIndex >= 0 && indexTmp < 0);
+
+                    if (preIndex < 0)
+                    {
+                        collection.Insert(index + 1, item);
+                        return;
+                    }
+
+                    index = indexTmp;
+                    parent = parent.ChildsList[preIndex];
+                    preIndex = parent.ChildsList?.Count ?? -1;
+                }
+
+
+                collection.Insert(index + 1, item);
+            }
+            else
+                collection.Add(item);
         }
 
         //Destructor
