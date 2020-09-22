@@ -27,10 +27,12 @@ namespace FileTreeGrids.Models.FileSystemItems
 
             public static FileSystemItemMemento Create(FileSystemItem item)
             {
-                return new FileSystemItemMemento { 
-                    isActive = item.isActive,  
+                return new FileSystemItemMemento
+                {
+                    isActive = item.isActive,
                     isHidden = item.isHidden,
-                    level = item.level};
+                    level = item.level
+                };
             }
         }
 
@@ -45,9 +47,7 @@ namespace FileTreeGrids.Models.FileSystemItems
         private string fullPath;
         private string name;
         private bool isDirectory;
-        private FileSystemWatcher watcher;
         private FileSystemInfo info;
-        private List<FileSystemItem> childsList;
         private CancellationTokenSource loadingTokenSource;
         private Task loadingTask;
 
@@ -125,29 +125,15 @@ namespace FileTreeGrids.Models.FileSystemItems
             }
         }
 
-        private List<FileSystemItem> ChildsList
+        internal List<FileSystemItem> ChildsList
         {
-            get => childsList;
-            set
-            {
-                childsList = value;
-                UpdateWatcherEvents();
-            }
+            get;
+            set;
         }
 
         //Constructors
         public FileSystemItem(FileSystemInfo info)
         {
-            watcher = new FileSystemWatcher();
-            watcher.Changed += Watcher_Changed;
-            watcher.Created += Watcher_Created;
-            watcher.Deleted += Watcher_Deleted;
-            watcher.Renamed += Watcher_Renamed;
-            watcher.NotifyFilter = NotifyFilters.LastAccess
-                                | NotifyFilters.LastWrite
-                                | NotifyFilters.FileName
-                                | NotifyFilters.DirectoryName;
-
             IsHidden = false;
             IsActive = false;
             Level = 0;
@@ -156,7 +142,43 @@ namespace FileTreeGrids.Models.FileSystemItems
         }
 
         //Methods
-        protected internal virtual void OnInfoChanged() 
+        internal void RemoveChild(string fullPath)
+        {
+            if (ChildsList != null)
+            {
+                var item = ChildsList.Find(i => i.FullPath == fullPath);
+                if (item != null)
+                {
+                    ChildsList.Remove(item);
+
+                    ChildsChanged?.Invoke(this,
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+                }
+            }
+        }
+        internal void AddChild(string fullPath)
+        {
+            if (ChildsList != null)
+            {
+                FileSystemItem item;
+                try
+                {
+                    item = Create(GetType(), fullPath);
+                }
+                catch
+                {
+                    return;
+                }
+                FixItemState(item, this);
+                ChildsList.Add(item);
+                ChildsList.Sort(FileSystemItemsComparers.NameComparer);
+
+                ChildsChanged?.Invoke(this,
+                    new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
+            }
+        }
+
+        protected internal virtual void OnInfoChanged()
         {
             try
             {
@@ -181,13 +203,6 @@ namespace FileTreeGrids.Models.FileSystemItems
                 Name = FullPath;
 
             IsDirectory = PathExtensions.IsDirectory(FullPath);
-            if (IsDirectory)
-            {
-                watcher.Path = FullPath;
-                UpdateWatcherEvents();
-            }
-            
-            
 
             OnPropertyChanged(nameof(FullPath));
         }
@@ -219,7 +234,8 @@ namespace FileTreeGrids.Models.FileSystemItems
             loadingTokenSource = new CancellationTokenSource();
             var token = loadingTokenSource.Token;
             var memento = FileSystemItemMemento.Create(this);
-            loadingTask = Task.Run(() => {
+            loadingTask = Task.Run(() =>
+            {
                 try
                 {
                     var newChilds = new List<FileSystemItem>();
@@ -245,7 +261,8 @@ namespace FileTreeGrids.Models.FileSystemItems
                     if (token.IsCancellationRequested)
                         return;
 
-                    Application.Current.Dispatcher.Invoke(() => {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
                         ChildsList = newChilds;
                         ChildsChanged?.Invoke(this,
                            new NotifyCollectionChangedEventArgs(
@@ -256,7 +273,7 @@ namespace FileTreeGrids.Models.FileSystemItems
                 catch { }
             });
 
-           
+
         }
         private void ClearChilds()
         {
@@ -270,7 +287,7 @@ namespace FileTreeGrids.Models.FileSystemItems
         }
         private void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() => 
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 var item = ChildsList?.Find(i => i.FullPath == e.FullPath);
                 item?.OnInfoChanged();
@@ -286,57 +303,11 @@ namespace FileTreeGrids.Models.FileSystemItems
         }
         private void Watcher_Renamed(object sender, RenamedEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() => 
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 RemoveChild(e.OldFullPath);
                 AddChild(e.FullPath);
             });
-        }
-        private void RemoveChild(string fullPath)
-        {
-            if (ChildsList != null)
-            {
-                var item = ChildsList.Find(i => i.FullPath == fullPath);
-                if (item != null)
-                {
-                    ChildsList.Remove(item);
-
-                    ChildsChanged?.Invoke(this,
-                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
-                }
-            }
-        }
-        private void AddChild(string fullPath)
-        {
-            if (ChildsList != null)
-            {
-                FileSystemItem item;
-                try
-                {
-                    item = Create(GetType(), fullPath);
-                }
-                catch
-                {
-                    return;
-                }
-                FixItemState(item, this);
-                ChildsList.Add(item);
-                ChildsList.Sort(FileSystemItemsComparers.NameComparer);
-
-                ChildsChanged?.Invoke(this,
-                    new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
-            }
-        }
-        private void UpdateWatcherEvents()
-        {
-            try
-            {
-                watcher.EnableRaisingEvents = IsDirectory && ChildsList != null;
-            }
-            catch
-            {
-                watcher.EnableRaisingEvents = false;
-            }
         }
         private void StopLoadingTask()
         {
@@ -353,7 +324,6 @@ namespace FileTreeGrids.Models.FileSystemItems
 
         ~FileSystemItem()
         {
-            watcher.Dispose();
             StopLoadingTask();
         }
     }

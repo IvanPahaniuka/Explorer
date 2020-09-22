@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows;
 
@@ -57,8 +58,10 @@ namespace FileTreeGrids.Models.FileSystemTrees
 
             watcher = new FileSystemWatcher();
             watcher.Changed += Watcher_Changed;
+            watcher.Created += Watcher_Created;
             watcher.Deleted += Watcher_Deleted;
             watcher.Renamed += Watcher_Renamed;
+            watcher.IncludeSubdirectories = true;
             watcher.NotifyFilter = NotifyFilters.LastAccess
                                 | NotifyFilters.LastWrite
                                 | NotifyFilters.FileName
@@ -71,11 +74,17 @@ namespace FileTreeGrids.Models.FileSystemTrees
             ReloadRoot();
 
             if (!string.IsNullOrWhiteSpace(RootFullPath) &&
-                Directory.Exists(RootFullPath) &&
-                !string.IsNullOrWhiteSpace(Path.GetDirectoryName(RootFullPath)))
+                Directory.Exists(RootFullPath))
             {
-                watcher.Path = Path.GetDirectoryName(RootFullPath);
-                watcher.EnableRaisingEvents = true;
+                try
+                {
+                    watcher.Path = RootFullPath;
+                    watcher.EnableRaisingEvents = true;
+                }
+                catch
+                {
+
+                }
             }
             else
                 watcher.EnableRaisingEvents = false;
@@ -108,22 +117,82 @@ namespace FileTreeGrids.Models.FileSystemTrees
         }
         private void Watcher_Renamed(object sender, RenamedEventArgs e)
         {
-            if (Root != null && e.Name == Root.Name)
-                Application.Current.Dispatcher.Invoke(() => {
-                    ReloadRoot();
+            if (Root != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var parentPath = Path.GetDirectoryName(e.FullPath);
+                    var parentItem = FindItem(parentPath);
+                    if (parentItem != null && parentItem.Childs != null)
+                    {
+                        parentItem.RemoveChild(e.OldFullPath);
+                        parentItem.AddChild(e.FullPath);
+                    }
                 });
+            }
         }
         private void Watcher_Deleted(object sender, FileSystemEventArgs e)
         {
-            if (Root != null && e.Name == Root.Name)
-                Application.Current.Dispatcher.Invoke(() => ReloadRoot());
+            if (Root != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var parentPath = Path.GetDirectoryName(e.FullPath);
+                    var parentItem = FindItem(parentPath);
+                    if (parentItem != null && parentItem.Childs != null)
+                        parentItem.RemoveChild(e.FullPath);
+                });
+            }
 
         }
         private void Watcher_Changed(object sender, FileSystemEventArgs e)
         {
-            if (Root != null && e.Name == Root.Name)
-                Application.Current.Dispatcher.Invoke(() => Root.OnInfoChanged());
+            if (Root != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var item = FindItem(e.FullPath);
+                    if (item != null)
+                        item.OnInfoChanged();
+                });
+            }
 
+        }
+        private void Watcher_Created(object sender, FileSystemEventArgs e)
+        {
+            if (Root != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var parentPath = Path.GetDirectoryName(e.FullPath);
+                    var parentItem = FindItem(parentPath);
+                    if (parentItem != null && parentItem.Childs != null)
+                        parentItem.AddChild(e.FullPath);
+                });
+            }
+        }
+        private FileSystemItem FindItem(string path)
+        {
+            var dirBuilder = new StringBuilder(256);
+            path = path.Substring(RootFullPath.Length).Trim('/', '\\');
+            var current = Root;
+
+            while (!string.IsNullOrWhiteSpace(path) && current != null)
+            {
+                dirBuilder.Clear();
+                for (int i = 0; i < path.Length && path[i] != '/' && path[i] != '\\'; i++)
+                    dirBuilder.Append(path[i]);
+
+                var dir = dirBuilder.ToString();
+                path = path.Substring(dir.Length).Trim('/', '\\');
+
+                if (current.Childs != null)
+                    current = current.Childs.First(i => i.Name == dir);
+                else
+                    current = null;
+            }
+
+            return current;
         }
 
         ~FileSystemTree()
