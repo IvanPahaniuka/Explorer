@@ -1,8 +1,6 @@
 ﻿using FileTreeGrids.Models.FileSystemItems;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace ExplorerUI.Models.FileSystemItems
 {

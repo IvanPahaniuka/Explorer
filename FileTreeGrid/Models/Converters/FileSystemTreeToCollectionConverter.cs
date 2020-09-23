@@ -1,19 +1,15 @@
 ﻿using FileTreeGrids.Models.FileSystemItems;
 using FileTreeGrids.Models.FileSystemTrees;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Text;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
-using System.ComponentModel;
-using System.Collections.Specialized;
-using System.Collections;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Collections.Immutable;
-using System.Linq;
 
 namespace FileTreeGrids.Models.Converters
 {

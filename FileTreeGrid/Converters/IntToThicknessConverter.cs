@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.DirectoryServices.ActiveDirectory;
 using System.Globalization;
-using System.Linq;
-using System.Security.RightsManagement;
-using System.Text;
-using System.Transactions;
 using System.Windows;
 using System.Windows.Data;
 

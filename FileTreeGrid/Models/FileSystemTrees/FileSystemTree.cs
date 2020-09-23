@@ -1,8 +1,5 @@
-﻿using FileTreeGrids.Extensions;
-using FileTreeGrids.Models.FileSystemItems;
+﻿using FileTreeGrids.Models.FileSystemItems;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
