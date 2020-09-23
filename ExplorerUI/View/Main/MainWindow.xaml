@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ExplorerUI.View.Main"
         xmlns:vm="clr-namespace:ExplorerUI.ViewModel.Main"
-        xmlns:model="clr-namespace:ExplorerUI.Models"
+        xmlns:items="clr-namespace:ExplorerUI.Models.FileSystemItems"
         xmlns:tree="clr-namespace:FileTreeGrids;assembly=FileTreeGrid"
         mc:Ignorable="d"
         Title="Проводник" Height="450" Width="800">
@@ -22,7 +22,7 @@
         </Menu>
 
         <tree:FileTreeGrid DockPanel.Dock="Top" Root="{Binding RootFullPath}" 
-                           ItemType="{Binding ItemType}">
+                           ItemType="{x:Type items:ExtendedSystemItem}">
             <tree:FileTreeGrid.Columns>
                         <DataGridTextColumn Header="Дата изменения" 
                                             Binding="{Binding Path=LastWriteTime, StringFormat='dd.MM.yyyy'}"/>

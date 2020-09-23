@@ -31,7 +31,7 @@ namespace ExplorerUI.View.Main
         {
             InitializeComponent();
 
-            model = new MainViewModel { ItemType = typeof(ExtendedSystemItem) };
+            model = new MainViewModel();
             DataContext = model;
         }
         

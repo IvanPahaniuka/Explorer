@@ -21,7 +21,6 @@ namespace ExplorerUI.ViewModel.Main
 
         //Fields
         private string rootFullPath;
-        private Type itemType;
         
         //Properties
         public string RootFullPath {
@@ -32,24 +31,11 @@ namespace ExplorerUI.ViewModel.Main
                 OnPropertyChanged();
             }
         }
-        public Type ItemType
-        {
-            get => itemType;
-            set
-            {
-                itemType = value;
-                OnPropertyChanged();
-            }
-        }
 
         //Constructors
         static MainViewModel()
         {
             SelectRoot = new RoutedCommand(nameof(SelectRoot), typeof(MainWindow));
-        }
-        public MainViewModel()
-        {
-            ItemType = typeof(FileSystemItem);
         }
 
         //Methods

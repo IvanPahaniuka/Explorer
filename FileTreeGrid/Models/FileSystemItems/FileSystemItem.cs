@@ -298,30 +298,6 @@ namespace FileTreeGrids.Models.FileSystemItems
                 ChildsList = null;
             }
         }
-        private void Watcher_Changed(object sender, FileSystemEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                var item = ChildsList?.Find(i => i.FullPath == e.FullPath);
-                item?.UpdateInfo();
-            });
-        }
-        private void Watcher_Deleted(object sender, FileSystemEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() => RemoveChild(e.FullPath));
-        }
-        private void Watcher_Created(object sender, FileSystemEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() => AddChild(e.FullPath));
-        }
-        private void Watcher_Renamed(object sender, RenamedEventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                RemoveChild(e.OldFullPath);
-                AddChild(e.FullPath);
-            });
-        }
         private void StopLoadingTask()
         {
             if (loadingTask != null &&
