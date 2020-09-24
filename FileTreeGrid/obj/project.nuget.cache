@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "L+zS2QLFZdn4/q3m0dVeJwffDLyWy1fYKUIWNSaoJCzYQ8j1P/GhgXKceT82EvNssAXnTmYC+qYw+kYZcYErVw==",
+  "success": true,
+  "projectFilePath": "F:\\Programs\\VSProjects\\Explorer\\FileTreeGrid\\FileTreeGrid.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.19\\microsoft.xaml.behaviors.wpf.1.1.19.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\system.drawing.common\\4.7.0\\system.drawing.common.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}

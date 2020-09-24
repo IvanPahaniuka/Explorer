@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "cE7cBJzJip1lhgBcZ7IL8geGEXIF/XMJRmVNKQcRHFZ0hB0YPiQl/xYziRwslJV6MbMd6y+w4oW3axwzjmR/vA==",
+  "success": true,
+  "projectFilePath": "F:\\Programs\\VSProjects\\Explorer\\ExplorerUI\\ExplorerUI.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.19\\microsoft.xaml.behaviors.wpf.1.1.19.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\ookii.dialogs.wpf.netcore\\2.1.0\\ookii.dialogs.wpf.netcore.2.1.0.nupkg.sha512",
+    "C:\\Users\\ivanp\\.nuget\\packages\\system.drawing.common\\4.7.0\\system.drawing.common.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}
